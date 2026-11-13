@@ -54,9 +54,9 @@ Le scheduler a réparti les 3 réplicas sur 3 nœuds différents : k3d-lab-agent
 ## Exercice 6 — Portainer & Mario
 
 12. URL publique de votre Mario :
-    >
+    >https://zany-fiesta-r4q557w5rr5xfpxrx-8585.app.github.dev/
 13. Retrouvez le Deployment `mario` en ligne de commande. Portainer et `kubectl` parlent-ils au même composant ? Lequel ?
-    >
+    > Oui, `kubectl get deploy mario -o yaml` retrouve le Deployment créé via Portainer. Il est de même nature que ceux créés en ligne de commande (`apiVersion: apps/v1`, `kind: Deployment`), avec éventuellement quelques annotations ou labels ajoutés par Portainer. Portainer et `kubectl` sont deux clients de la même **API Server** du control plane : toute action passe par elle, et l'état du cluster est stocké dans etcd.
 
 ## Bonus (facultatif)
 
