@@ -61,8 +61,13 @@ Le scheduler a réparti les 3 réplicas sur 3 nœuds différents : k3d-lab-agent
 ## Bonus (facultatif)
 
 14. Bonus réalisés et remarques :
-    >
+    >   > **A (Ingress)** : l'Ingress `site` (classe `traefik`) est créé et répond sur le port 8081, relié au load balancer du cluster. Après la suppression des 3 pods `site`, le site reste accessible sans relancer de tunnel : Traefik route vers le Service `site`, qui suit automatiquement les nouveaux pods, alors qu'un `port-forward` reste attaché à un pod précis et casse quand il disparaît.
+    > **B (probes et ressources)** : j'ai ajouté une `readinessProbe` HTTP sur `/` (port 80) et des `resources` (requests 50m CPU / 32Mi, limits 100m CPU / 64Mi). Avec la probe sur `/nope`, nginx répond 404 : le nouveau pod `site-f58cfdbb6-8zxsm` reste en `0/1 Running` (il tourne mais n'est jamais prêt), donc il ne reçoit aucun trafic, et les 3 anciens pods restent `1/1` : le site reste en ligne. Après retour à `/`, les pods sont de nouveau `1/1`.
+    > **C (drain)** : après `kubectl drain k3d-lab-agent-0`, le nœud est passé en `Ready,SchedulingDisabled` et ses pods ont été évincés (dont un pod `site`, traefik et metrics-server). Le pod `site` a été recréé sur `k3d-lab-agent-1`. Après `uncordon`, le nœud est de nouveau `Ready`, mais aucun pod n'est revenu dessus : le scheduler ne déplace pas des pods déjà en cours d'exécution, il ne place que les nouveaux. Il faudrait par exemple un `kubectl rollout restart` pour rééquilibrer.
+    > **D (namespaces)** : j'ai créé le namespace `prod` et déployé dans `prod` une seconde copie du site (`kubectl apply -n prod -f k8s/site/`), isolée du namespace `default` (ConfigMap, Deployment et Service séparés). Je l'ai ensuite supprimé avec `kubectl delete namespace prod`.
 
 ---
 
-**Score obtenu avec `./scripts/check.sh` :** ... / ...
+---
+
+**Score obtenu avec `./scripts/check.sh` :** 18 / 18
